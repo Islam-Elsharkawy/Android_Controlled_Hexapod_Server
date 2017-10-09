@@ -41,24 +41,6 @@ public class Hexa {
                 }catch(Exception e) {e.printStackTrace();}
             }
         }).start();
-        
-//        move("stop");
-//        pause(1000);
-//        move(direction.forward);
-//        pause(10000);
-//        move(direction.backward);
-//        pause(10000);
-//        move(direction.right);
-//        pause(10000);
-//        move("left");
-//        pause(10000);
-//        move(direction.still);
-                        
-        
-        
-//        pause(10000);
-//        pwmDriver.powerOff();
-//        pwmDriver.powerOff();
     }
     
     public void setLeg (int legNumber, int angle1, int angle2) {
@@ -147,6 +129,7 @@ public class Hexa {
                     moveLeg3_FD();
                     moveLeg5_FD();        
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg0_FU();
                     moveLeg2_FU();
                     moveLeg4_FU();
@@ -154,10 +137,12 @@ public class Hexa {
                     moveLeg3_Still();
                     moveLeg5_Still();
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg0_FD();
                     moveLeg2_FD();
                     moveLeg4_FD();        
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg1_FU();
                     moveLeg3_FU();
                     moveLeg5_FU();
@@ -183,6 +168,7 @@ public class Hexa {
                     moveLeg2_BD();
                     moveLeg4_BD();        
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg1_BU();
                     moveLeg3_BU();
                     moveLeg5_BU();
@@ -190,10 +176,12 @@ public class Hexa {
                     moveLeg2_Still();
                     moveLeg4_Still();
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg1_BD();
                     moveLeg3_BD();
                     moveLeg5_BD();        
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg0_BU();
                     moveLeg2_BU();
                     moveLeg4_BU();
@@ -219,6 +207,7 @@ public class Hexa {
                     moveLeg2_FD();
                     moveLeg4_BD();        
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg1_FU();
                     moveLeg3_BU();
                     moveLeg5_BU();
@@ -226,10 +215,12 @@ public class Hexa {
                     moveLeg2_Still();
                     moveLeg4_Still();
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg1_FD();
                     moveLeg3_BD();
                     moveLeg5_BD();        
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg0_FU();
                     moveLeg2_FU();
                     moveLeg4_BU();
@@ -255,6 +246,7 @@ public class Hexa {
                     moveLeg3_FD();
                     moveLeg5_FD();        
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg0_BU();
                     moveLeg2_BU();
                     moveLeg4_FU();
@@ -262,10 +254,12 @@ public class Hexa {
                     moveLeg3_Still();
                     moveLeg5_Still();
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg0_BD();
                     moveLeg2_BD();
                     moveLeg4_FD();        
                     pause(300);
+                    if(resume == false) {break;}
                     moveLeg1_BU();
                     moveLeg3_FU();
                     moveLeg5_FU();
@@ -280,7 +274,7 @@ public class Hexa {
     
     public void move (String d1) {
         resume = false;
-        pause(1500);
+        pause(400);
         moveStill();
         
         switch (d1){
