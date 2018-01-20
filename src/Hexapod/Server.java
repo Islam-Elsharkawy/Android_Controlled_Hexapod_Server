@@ -39,6 +39,7 @@ public class Server {
                         client = server.accept();
                         System.out.println("hello");
                         new Hexa(client);
+                        new Video_Stream(client);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
