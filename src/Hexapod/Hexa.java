@@ -19,14 +19,25 @@ public class Hexa {
     private DataInputStream dis = null;
     
     PWM_Driver pwmDriver = new PWM_Driver(0x41); 
-    String request = null;
+    enum movement {
+        right_forward_up,
+        right_forward_down,
+        right_backward_up,
+        right_backward_down,
+        left_forward_up,
+        left_forward_down,
+        left_backward_up,
+        left_backward_down,
+        still
+    };
+    movement move_status = null;      
+    String new_move = null;
     boolean client_resume = true;
-    boolean resume = true;
     
     public Hexa(Socket client) {
         
         pwmDriver.setFrequency(50);
-        move("stop");
+        moveStill();
         new Thread(new Runnable(){
             public void run(){
                 try {
@@ -34,9 +45,9 @@ public class Hexa {
                     dis = new DataInputStream(is);
                     client_resume = true;
                     while(client_resume) {
-                        request = dis.readUTF();
-                        System.out.println(request);
-                        move(request);
+                        new_move = dis.readUTF();
+                        System.out.println(new_move);
+                        move(new_move);
                     }
                 }catch(Exception e) {e.printStackTrace();}
             }
@@ -107,176 +118,176 @@ public class Hexa {
     public void moveLeg4_BD(){ setLeg(4, 20, 0);}
     public void moveLeg5_BD(){ setLeg(5, 65, 0);}
     
-    public void moveStill() {
-        moveLeg0_Still();
-        moveLeg1_Still();
-        moveLeg2_Still();
-        moveLeg3_Still();
-        moveLeg4_Still();
-        moveLeg5_Still();
-        pause(300);
-    }
+    public void moveRight_FU(){ moveLeg1_FU(); moveLeg3_FU(); moveLeg5_FU();}
+    public void moveRight_FD(){ moveLeg1_FD(); moveLeg3_FD(); moveLeg5_FD();}
+    public void moveRight_BU(){ moveLeg1_BU(); moveLeg3_BU(); moveLeg5_BU();}
+    public void moveRight_BD(){ moveLeg1_BD(); moveLeg3_BD(); moveLeg5_BD();}
+    public void moveRight_Still(){moveLeg1_Still(); moveLeg3_Still(); moveLeg5_Still();}
+    public void moveLeft_FU(){ moveLeg0_FU(); moveLeg2_FU(); moveLeg4_FU();}
+    public void moveLeft_FD(){ moveLeg0_FD(); moveLeg2_FD(); moveLeg4_FD();}
+    public void moveLeft_BU(){ moveLeg0_BU(); moveLeg2_BU(); moveLeg4_BU();}
+    public void moveLeft_BD(){ moveLeg0_BD(); moveLeg2_BD(); moveLeg4_BD();}
+    public void moveLeft_Still(){moveLeg0_Still(); moveLeg2_Still(); moveLeg4_Still();}
+
     public void moveForward() {
-        new Thread(new Runnable(){
-            public void run(){
-                resume = true;
-                moveLeg1_FU();
-                moveLeg3_FU();
-                moveLeg5_FU();
-                pause(300);
-                while(resume) {
-                    moveLeg1_FD();
-                    moveLeg3_FD();
-                    moveLeg5_FD();        
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg0_FU();
-                    moveLeg2_FU();
-                    moveLeg4_FU();
-                    moveLeg1_Still();
-                    moveLeg3_Still();
-                    moveLeg5_Still();
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg0_FD();
-                    moveLeg2_FD();
-                    moveLeg4_FD();        
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg1_FU();
-                    moveLeg3_FU();
-                    moveLeg5_FU();
-                    moveLeg0_Still();
-                    moveLeg2_Still();
-                    moveLeg4_Still();
-                    pause(300);
-                }
-            }
-        }).start();
+        switch(move_status) {
+            case still:
+                moveRight_FU();
+                move_status = movement.right_forward_up;
+                break;
+            case right_forward_up:
+                moveRight_FD();
+                move_status = movement.right_forward_down;
+                break;
+            case right_forward_down:
+                moveLeft_FU();
+                moveRight_Still();
+                move_status = movement.left_forward_up;
+                break;
+            case left_forward_up:
+                moveLeft_FD();
+                move_status = movement.left_forward_down;
+                break;
+            case left_forward_down:
+                moveRight_FU();
+                moveLeft_Still();
+                move_status = movement.right_forward_up;
+                break;
+            default:
+                moveStill();
+        }
     }
     
-        public void moveBackward() {
-        new Thread(new Runnable(){
-            public void run(){
-                resume = true;
-                moveLeg0_BU();
-                moveLeg2_BU();
-                moveLeg4_BU();
-                pause(300);
-                while(resume) {
-                    moveLeg0_BD();
-                    moveLeg2_BD();
-                    moveLeg4_BD();        
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg1_BU();
-                    moveLeg3_BU();
-                    moveLeg5_BU();
-                    moveLeg0_Still();
-                    moveLeg2_Still();
-                    moveLeg4_Still();
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg1_BD();
-                    moveLeg3_BD();
-                    moveLeg5_BD();        
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg0_BU();
-                    moveLeg2_BU();
-                    moveLeg4_BU();
-                    moveLeg1_Still();
-                    moveLeg3_Still();
-                    moveLeg5_Still();
-                    pause(300);
-                }
-            }
-        }).start();
+    public void moveBackward() {
+        switch(move_status) {
+            case still:
+                moveLeft_BU();
+                move_status = movement.left_backward_up;
+                break;
+            case left_backward_up:
+                moveLeft_BD();
+                move_status = movement.left_backward_down;
+                break;
+            case left_backward_down:
+                moveRight_BU();
+                moveLeft_Still();
+                move_status = movement.right_backward_up;
+                break;
+            case right_backward_up:
+                moveRight_BD();
+                move_status = movement.right_backward_down;
+                break;
+            case right_backward_down:
+                moveLeft_BU();
+                moveRight_Still();
+                move_status = movement.left_backward_up;
+                break;
+            default:
+                moveStill();
+        }
     }
 
-    public void moveRight() {
-        new Thread(new Runnable(){
-            public void run(){
-                resume = true;
-                moveLeg0_FU();
-                moveLeg2_FU();
-                moveLeg4_BU();
-                pause(300);
-                while(resume) {
-                    moveLeg0_FD();
-                    moveLeg2_FD();
-                    moveLeg4_BD();        
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg1_FU();
-                    moveLeg3_BU();
-                    moveLeg5_BU();
-                    moveLeg0_Still();
-                    moveLeg2_Still();
-                    moveLeg4_Still();
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg1_FD();
-                    moveLeg3_BD();
-                    moveLeg5_BD();        
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg0_FU();
-                    moveLeg2_FU();
-                    moveLeg4_BU();
-                    moveLeg1_Still();
-                    moveLeg3_Still();
-                    moveLeg5_Still();
-                    pause(300);
-                }
-            }
-        }).start();
-    }        
-        
     public void moveLeft() {
-        new Thread(new Runnable(){
-            public void run(){
-                resume = true;
-                moveLeg1_BU();
-                moveLeg3_FU();
-                moveLeg5_FU();
-                pause(300);
-                while(resume) {
-                    moveLeg1_BD();
-                    moveLeg3_FD();
-                    moveLeg5_FD();        
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg0_BU();
-                    moveLeg2_BU();
-                    moveLeg4_FU();
-                    moveLeg1_Still();
-                    moveLeg3_Still();
-                    moveLeg5_Still();
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg0_BD();
-                    moveLeg2_BD();
-                    moveLeg4_FD();        
-                    pause(300);
-                    if(resume == false) {break;}
-                    moveLeg1_BU();
-                    moveLeg3_FU();
-                    moveLeg5_FU();
-                    moveLeg0_Still();
-                    moveLeg2_Still();
-                    moveLeg4_Still();
-                    pause(300);
-                }
-            }
-        }).start();
+        switch(move_status) {
+            case still:
+                moveRight_FU();
+                move_status = movement.right_forward_up;
+                break;
+            case right_forward_up:
+                moveRight_FD();
+                move_status = movement.right_forward_down;
+                break;
+            case right_forward_down:
+                moveLeft_BU();
+                moveRight_Still();
+                move_status = movement.left_backward_up;
+                break;
+            case left_backward_up:
+                moveLeft_BD();
+                move_status = movement.left_backward_down;
+                break;
+            case left_backward_down:
+                moveRight_FU();
+                moveLeft_Still();
+                move_status = movement.right_forward_up;
+                break;
+            default:
+                moveStill();
+        }
+    }
+        
+    public void moveRight() {
+        switch(move_status) {
+            case still:
+                moveLeft_FU();
+                move_status = movement.left_forward_up;
+                break;
+            case left_forward_up:
+                moveLeft_FD();
+                move_status = movement.left_forward_down;
+                break;
+            case left_forward_down:
+                moveRight_BU();
+                moveLeft_Still();
+                move_status = movement.right_backward_up;
+                break;
+            case right_backward_up:
+                moveRight_BD();
+                move_status = movement.right_backward_down;
+                break;
+            case right_backward_down:
+                moveLeft_FU();
+                moveRight_Still();
+                move_status = movement.left_forward_up;
+                break;
+            default:
+                moveStill();
+        }
+    }
+    
+    public void moveStill() {
+        switch(move_status) {
+            case right_forward_up:
+                moveRight_Still();
+                move_status = movement.still;
+                break;
+            case right_forward_down:
+                moveRight_FU();
+                move_status = movement.right_forward_up;
+                break;
+            case right_backward_up:
+                moveRight_Still();
+                move_status = movement.still;                
+                break;
+            case right_backward_down:
+                moveRight_BU();
+                move_status = movement.right_backward_up;
+                break;
+            case left_forward_up:
+                moveLeft_Still();
+                move_status = movement.still;
+                break;
+            case left_forward_down:
+                moveLeft_FU();
+                move_status = movement.left_forward_up;                
+                break;
+            case left_backward_up:
+                moveLeft_Still();                
+                move_status = movement.still;
+                break;
+            case left_backward_down:
+                moveLeft_BU();
+                move_status = movement.left_backward_up;
+                break;
+            default:
+                moveRight_Still();
+                moveLeft_Still();
+                move_status = movement.still;
+        }
+
     }
     
     public void move (String d1) {
-        resume = false;
-        pause(400);
-        moveStill();
-        
         switch (d1){
             case "forward":
                 moveForward();
@@ -290,7 +301,7 @@ public class Hexa {
             case "left":
                 moveLeft();
                 break;
-            case "stop":
+            case "still":
                 moveStill();
                 break;
             case "close":
@@ -299,16 +310,10 @@ public class Hexa {
                 pwmDriver.powerOff();
                 pwmDriver.close();
         }
-                
+        pause(300);        
     }
     
-    void pause (int time)
-    {
-        try {
-            Thread.sleep(time);
-        }catch (Exception e) {
-            e.printStackTrace();
-        }        
+    void pause (int time) {
+        try{Thread.sleep(time);} catch(Exception e) {e.printStackTrace();}        
     }
-    
 }
